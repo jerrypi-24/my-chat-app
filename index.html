@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"></script>
+</head>
+<body>
+    <h2>Chat</h2>
+    <input type="text" id="username" placeholder="Enter username">
+    <input type="text" id="message" placeholder="Type a message">
+    <button onclick="sendMessage()">Send</button>
+    
+    <div id="messages"></div>
+
+    <h2>Upload File</h2>
+    <input type="file" id="fileInput">
+    <button onclick="uploadFile()">Upload</button>
+
+    <script>
+        var socket = io.connect('http://your-server-ip:5000');
+
+        socket.on('message', function(data) {
+            document.getElementById("messages").innerHTML += `<p><b>${data.username}:</b> ${data.text}</p>`;
+        });
+
+        function sendMessage() {
+            var username = document.getElementById("username").value;
+            var message = document.getElementById("message").value;
+            socket.send({username: username, text: message});
+        }
+
+        function uploadFile() {
+            var fileInput = document.getElementById("fileInput").files[0];
+            var formData = new FormData();
+            formData.append('file', fileInput);
+
+            fetch('/upload', { method: 'POST', body: formData })
+            .then(response => response.json())
+            .then(data => alert("File uploaded: " + data.file_url));
+        }
+    </script>
+</body>
+</html>
